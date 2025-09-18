@@ -17,6 +17,11 @@ if "movement_active" not in st.session_state:
 start = st.button("▶️ Start")
 stop = st.button("⏹️ Stop")
 
+# Sensitivity controls
+st.sidebar.header(" Sensitivity Settings")
+pixel_diff_threshold = st.sidebar.slider("Pixel Intensity Threshold", 5, 50, 15)
+area_threshold = st.sidebar.slider("Pixel Change Area", 5000, 100000, 15000, step=1000)
+
 # Toggle for output mode
 view_mode = st.selectbox("View mode", ["Normal", "Event-based"])
 
@@ -31,7 +36,7 @@ if start:
 
 if stop:
     st.session_state.running = False
-    st.write(f"✅ Total movement time: **{st.session_state.total_time:.2f} seconds**")
+    st.write(f" Total movement time: **{st.session_state.total_time:.2f} seconds**")
 
 if st.session_state.running:
     cap = cv2.VideoCapture(0)
@@ -49,10 +54,10 @@ if st.session_state.running:
             prev_frame = gray
             continue
 
-        # smaller threshold values → more sensitive
+        # use slider values for sensitivity
         frame_delta = cv2.absdiff(prev_frame, gray)
-        thresh = cv2.threshold(frame_delta, 15, 255, cv2.THRESH_BINARY)[1]
-        movement_detected = np.sum(thresh) > 15000  # lower sensitivity threshold
+        thresh = cv2.threshold(frame_delta, pixel_diff_threshold, 255, cv2.THRESH_BINARY)[1]
+        movement_detected = np.sum(thresh) > area_threshold
 
         now = time.time()
 
@@ -76,7 +81,7 @@ if st.session_state.running:
             frame_to_show = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
 
         frame_placeholder.image(frame_to_show, channels="BGR")
-        time_placeholder.write(f"⏱ Movement time: **{st.session_state.total_time:.2f} seconds**")
+        time_placeholder.write(f" Movement time: **{st.session_state.total_time:.2f} seconds**")
 
         prev_frame = gray
         cv2.waitKey(30)
