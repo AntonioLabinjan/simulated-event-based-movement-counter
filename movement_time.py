@@ -17,7 +17,7 @@ if "movement_active" not in st.session_state:
 start = st.button("▶️ Start")
 stop = st.button("⏹️ Stop")
 
-# Add toggle for output mode
+# Toggle for output mode
 view_mode = st.selectbox("View mode", ["Normal", "Event-based"])
 
 frame_placeholder = st.empty()
@@ -49,9 +49,10 @@ if st.session_state.running:
             prev_frame = gray
             continue
 
+        # smaller threshold values → more sensitive
         frame_delta = cv2.absdiff(prev_frame, gray)
-        thresh = cv2.threshold(frame_delta, 25, 255, cv2.THRESH_BINARY)[1]
-        movement_detected = np.sum(thresh) > 50000  # tweak sensitivity
+        thresh = cv2.threshold(frame_delta, 15, 255, cv2.THRESH_BINARY)[1]
+        movement_detected = np.sum(thresh) > 15000  # lower sensitivity threshold
 
         now = time.time()
 
